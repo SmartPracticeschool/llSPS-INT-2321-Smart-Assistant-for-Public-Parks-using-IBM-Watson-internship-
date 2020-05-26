@@ -1,0 +1,18 @@
+from ibm_watson import TextToSpeechV1
+from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
+
+
+authenticator = IAMAuthenticator('HLgqHWlgFanS6UcZG49Hzm7M-urzGPW8ibGXsdc4GiLp')
+text_to_speech = TextToSpeechV1(
+    authenticator=authenticator
+)
+
+text_to_speech.set_service_url('https://api.au-syd.text-to-speech.watson.cloud.ibm.com/instances/b96fc845-22e1-4be8-9ccd-2de6b7631ca9')
+
+with open('goodevevning.mp3', 'wb') as audio_file:
+    audio_file.write(
+        text_to_speech.synthesize(
+            'good evening ',
+            voice='en-US_AllisonVoice',
+            accept='audio/mp3'        
+        ).get_result().content)

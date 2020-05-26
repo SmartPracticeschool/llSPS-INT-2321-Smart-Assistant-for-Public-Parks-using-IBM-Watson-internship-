@@ -1,0 +1,31 @@
+import json
+from ibm_watson import AssistantV2
+from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
+
+authenticator = IAMAuthenticator('3ALWrtsTzmqjsDfhmSSbLL3a_rN0rXd88u81QxAt2ztA')
+assistant = AssistantV2(
+    version='2020-04-01',
+    authenticator = authenticator
+)
+
+assistant.set_service_url('https://api.eu-gb.assistant.watson.cloud.ibm.com/instances/bf4931f2-e336-4d61-bb3b-2c8427f07053')
+
+response = assistant.create_session(
+    assistant_id='95a03a2c-948b-4163-bcaf-6dc4f603f129'
+).get_result()
+
+session_id1=response['session_id']
+
+
+response = assistant.message(
+    assistant_id='95a03a2c-948b-4163-bcaf-6dc4f603f129',
+    session_id=session_id1,
+    input={
+        'message_type': 'text',
+        'text': 'what is the cost for entrance'
+    }
+).get_result()
+
+a=response['output']['generic'][0]['text']
+
+print(a)

@@ -1,0 +1,68 @@
+import json
+from os.path import join, dirname
+from ibm_watson import AssistantV2,SpeechToTextV1,TextToSpeechV1
+from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
+from playsound import playsound
+
+def stt(file):
+    authenticator = IAMAuthenticator('bmkLlXMAN3GrxCKrgc-0O0bP31p1cVEhpbfsiXXW8ZXO')
+    speech_to_text = SpeechToTextV1(
+        authenticator=authenticator
+    )
+    speech_to_text.set_service_url('https://api.au-syd.speech-to-text.watson.cloud.ibm.com/instances/59cd4429-32ef-479d-af17-ccd29b79edaa')
+
+    with open(join(dirname(__file__), './.',r'parkingcost.mp3'),
+              'rb') as audio_file:
+        speech_recognition_results = speech_to_text.recognize(
+            audio=audio_file,
+            content_type='audio/mp3',
+        ).get_result()
+    a=speech_recognition_results['results'][0]['alternatives'][0]['transcript']
+    return a
+
+def chatbot(text):
+    authenticator = IAMAuthenticator('3ALWrtsTzmqjsDfhmSSbLL3a_rN0rXd88u81QxAt2ztA')
+    assistant = AssistantV2(
+        version='2020-04-01',
+        authenticator = authenticator
+    )
+    assistant.set_service_url('https://api.eu-gb.assistant.watson.cloud.ibm.com/instances/bf4931f2-e336-4d61-bb3b-2c8427f07053')
+    response = assistant.create_session(
+        assistant_id='95a03a2c-948b-4163-bcaf-6dc4f603f129'
+    ).get_result()
+    session_id1=response['session_id']
+    response = assistant.message(
+        assistant_id='95a03a2c-948b-4163-bcaf-6dc4f603f129',
+        session_id=session_id1,
+        input={
+            'message_type': 'text',
+            'text': text
+        }
+    ).get_result()
+    a=response['output']['generic'][0]['text']
+    print(a)
+    return a
+
+
+def tts(a):
+    authenticator = IAMAuthenticator('HLgqHWlgFanS6UcZG49Hzm7M-urzGPW8ibGXsdc4GiLp')
+    text_to_speech = TextToSpeechV1(
+        authenticator=authenticator
+    )
+
+    text_to_speech.set_service_url('https://api.au-syd.text-to-speech.watson.cloud.ibm.com/instances/b96fc845-22e1-4be8-9ccd-2de6b7631ca9')
+
+    with open('goodevevning.mp3', 'wb') as audio_file:
+        audio_file.write(
+            text_to_speech.synthesize(
+                a,
+                voice='en-US_AllisonVoice',
+                accept='audio/mp3'        
+            ).get_result().content)
+    playsound('goodevevning.mp3')
+
+file='file_name.mp3'
+a=stt(file)
+new=chatbot(a)
+tts(new)
+    
